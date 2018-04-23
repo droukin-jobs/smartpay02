@@ -169,6 +169,7 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 	//process url options
 	if(uinfo & URL_ERROR) json_error(tmp,"Invalid URL");
 	else if (uinfo & METHOD_POST){                  //process POST request
+		printf("processing POST\n");
 		if(uinfo & URL_TERMINAL){//empty POST will create terminal  
 			int id = add_terminal();
 			if(id == -1) json_error(tmp,"Could not create terminal");

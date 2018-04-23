@@ -11,7 +11,8 @@ static int last_terminal = -1;
 // adds terminal, if over limit returns -1
 int add_terminal(){
 	if((MAX_TERMINALS - 1) <= last_terminal) return -1;
-	int i = ++last_terminal;
+	last_terminal += 1;
+	int i = last_terminal;
 	printf("creating terminal index %d",i);
 	terminals[i].id = i;
 	terminals[i].last_transaction = -1;
@@ -24,11 +25,13 @@ int add_terminal(){
 int add_transaction(int terminal, int card, int acct){
 	int id = terminal;
 	int i = id;
+	printf("add transaction (%d,%d) for term %d of %d\n",card,acct,i,last_terminal);	
 	if(terminal > last_terminal) return -1;
-
-	if(MAX_TRANSACTIONS == terminals[i].last_transaction - 1) return -1;
+	printf("MAX = %d, transaction = %d\n", MAX_TRANSACTIONS, terminals[i].last_transaction);	
+	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
 	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
-	int j = ++terminals[i].last_transaction;	
+	terminals[i].last_transaction += 1;
+	int j = terminals[i].last_transaction;	
 	terminals[i].transactions[j].id = j;
 	terminals[i].transactions[j].card = card;
 	terminals[i].transactions[j].acct = acct;
