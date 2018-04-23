@@ -1,4 +1,6 @@
 ./*.o
 ./sp_server
 ./*~
-
+./simplepost.c
+./post_example.c
+./*.swp

@@ -50,7 +50,7 @@ int list_terminals(char *data, const int max_data){
 	}
 	int data_len = sprintf(data,"\"terminals\":[\n");
 	for(i=0;i<=last_terminal;i++){
-		int len = sprintf(tmp,"{\"TerminalID\":\"%04d\"},\n",terminals[i].id);
+		int len = sprintf(tmp,"\"TerminalID\":\"%04d\"},\n",terminals[i].id);
 		if(i == last_terminal) tmp[len - 2] = ' ';
 		memcpy(data + data_len , tmp, strlen(tmp));
 		data_len += len;
@@ -63,40 +63,49 @@ int list_terminals(char *data, const int max_data){
 
 int list_transactions(int id, char *data, const int max_data){
 	int i;
-	char tmp[24];
-	int lt = terminals[i].last_transaction;
+	char tmp[100];
+	int lt = terminals[id].last_transaction;
+	printf("list transactions lt=%d\n",lt);
 	if(lt == -1){
 		return lt;
 	}
-	printf("list transaction\n");
+	printf("list transaction for term %d\n",id);
 	int data_len = sprintf(data,"[\n");
 	for(i=0;i<=lt;i++){
-		printf("listing transaction %d\n",i);
+		printf("listing transaction %d of %d\n",i, lt);
 		int c_id = terminals[id].transactions[i].card;
 		int a_id = terminals[id].transactions[i].acct;
-		int len = sprintf(tmp,"{\"CardType\":\"%s\"},{\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		printf("about to update data\n");
+		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
 		if(i == lt) tmp[len - 2] = ' ';
-		memcpy(data + data_len , tmp, strlen(tmp));
+		printf("about to update data \n |%s|\n %d chars at %d\n",tmp, len, data_len);
+		memcpy(data + data_len , tmp, len);
 		printf("updated data\n");
 		data_len += len;
 		if(data_len > max_data - len -2 ) break;
 	}
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
+	printf("DATA %s\n",data);
 	return lt;
 }
 // shows terminal json object with dummy (at the moment) transactions
 void show_terminal_info(char* tmp, int id){
+	
 	if(id > last_terminal){
+		printf("invalid id %d of %d\n",id, last_terminal);
 		json_error(tmp,"Invalid terminal");
 		return;
 	}
-	char data[MAX_DATA];
-
-	list_transactions(id,data,MAX_DATA);
+	printf("show term info id %d\n",id);
+	char *data = (char*)malloc(MAX_DATA);
+	printf("list transactions with max data %d\n",MAX_DATA);
+	if(list_transactions(id,data,MAX_DATA) == -1){
+		printf("no transactions\n");
+		sprintf(data,"\"Transactions\":[]");	
+	}
 	printf("end list transactions\n");
-	sprintf(tmp,"{\"TerminalID\":\"%d\",%s",data);
+	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
+	printf("TMP %s\n",tmp);
 }
 
 void init(void){

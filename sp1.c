@@ -63,9 +63,13 @@ send_page (struct MHD_Connection *connection, const char *page)
   response =
     MHD_create_response_from_buffer (strlen (page), (void *) page,
 				     MHD_RESPMEM_PERSISTENT);
-  if (!response)
-    return MHD_NO;
+  if (!response){
+		printf("response = null\n");
+		return MHD_NO;
 
+  }
+
+  MHD_add_response_header(response, "Content-Type","application/json");
   ret = MHD_queue_response (connection, MHD_HTTP_OK, response);
   MHD_destroy_response (response);
 
@@ -163,15 +167,18 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 	}
 	
 	//prepare default value
-	char tmp[MAX_PAGE_SIZE];
+	static char tmp[MAX_PAGE_SIZE];
 	json_str(tmp,"buffer","uninitialized");
 	int uinfo = url_get_info(url,method);
+	printf("ULR %s info %d\n",url, uinfo);
 	//process url options
 	if(uinfo & URL_ERROR) json_error(tmp,"Invalid URL");
 	else if (uinfo & METHOD_POST){                  //process POST request
 		printf("processing POST\n");
 		if(uinfo & URL_TERMINAL){//empty POST will create terminal  
+			printf("will add terminal\n");
 			int id = add_terminal();
+			printf("new term id = %d\n",id);
 			if(id == -1) json_error(tmp,"Could not create terminal");
 			else json_int(tmp,"terminalID",id);
 		}else if(uinfo & URL_TERMINAL_ID){      //POST method to update terminal
@@ -215,7 +222,9 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 					}
 					//TODO if transactions oK - add transaction
 					if(c_id != -1 && a_id != -1) {
-						if(add_transaction(id,c_id,a_id)!=-1) show_terminal_info(tmp,id);
+						if(add_transaction(id,c_id,a_id)!=-1){
+							show_terminal_info(tmp,id);
+						}
 						else json_error(tmp,"Could not create transaction");
 					}	
 				}
@@ -236,8 +245,9 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 			if(list_terminals(tmp, MAX_PAGE_SIZE) == -1) json_error(tmp,"No terminals");
 		}
 	}
-
-    return send_page(connection, tmp);
+	char tmptmp[MAX_PAGE_SIZE];
+	sprintf(tmptmp,json_page, tmp);
+    return send_page(connection, tmptmp);
 }
 
 int
