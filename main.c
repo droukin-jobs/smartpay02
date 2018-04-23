@@ -41,7 +41,7 @@
 extern char cards[3][11];
 extern char accts[3][11];
 
-const char *json_page = "{%s}";
+const char *json_page = "{%s}\n";
 
 struct connection_info_struct
 {
@@ -90,7 +90,7 @@ iterate_post (void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
   (void)transfer_encoding;  /* Unused. Silent compiler warning. */
   (void)off;                /* Unused. Silent compiler warning. */
 
-  if (0 == strcmp (key, "json"))
+  //if (0 == strcmp (key, "json"))
     {
 		printf("iteratro JSON data %s len %d\n",data,size);
 		printf("JSON debug sizeof(size_t) %d\n",sizeof(size_t));
@@ -132,6 +132,7 @@ request_completed (void *cls, struct MHD_Connection *connection,
 
   if (con_info->citype == POST)
     {
+		printf("destroy POST processor\n");
       MHD_destroy_post_processor (con_info->pp);
       if (con_info->cidata)
         free (con_info->cidata);
@@ -139,6 +140,7 @@ request_completed (void *cls, struct MHD_Connection *connection,
 
   free (con_info);
   *con_cls = NULL;
+  printf("====== request completed =============\n");
 }
 
 
@@ -187,7 +189,7 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 			int id = add_terminal();
 			printf("new term id = %d\n",id);
 			if(id == -1) json_error(tmp,"Could not create terminal");
-			else json_int(tmp,"terminalID",id);
+			else json_int(tmp,"TerminalID",id);
 		}else if(uinfo & URL_TERMINAL_ID){      //POST method to update terminal
 			int id = url_get_id(url);
 			if(id == -1) json_error(tmp,"Invalid terminal ID");

@@ -16,6 +16,33 @@ fi
 
 server=http://localhost:8888
 MAX_TERMINALS=100
+t_v="json={'CardType':'Visa','TransactionType':'Credit'}" 		#Visa:Credit
+t_m="json={'CardType':'MasterCard','TransactionType':'Credit'}" #MAsterCard:Credit
+t_s="json={'CardType':'EFTPOS','TransactionType':'Savings'}"	#Eftpos:Savings
+t_c="json={'CardType':'EFTPOS','TransactionType':'Cheque'}"		#EFtpos:Cheque
+post_data=""
+q=""
+
+curl_post() {
+
+	data=$1
+	url=$2
+	
+	echo "curl -ss -X POST -d "$data" $server/$url > /dev/null"
+	curl -ss -X POST -d "$data" $server/$url
+}
+curl_get() {
+	url=$1
+	echo "curl -ss -X GET $server/$url > /dev/null"
+	curl -ss -X GET $server/$url
+}
+
+
+#curl_post " " terminal
+#curl_post "$t_v" "terminals/0"
+#curl_get terminals
+#curl_get "terminals/0"
+
 
 # Scenario 0
 # query /terminals - should get an error
@@ -26,11 +53,13 @@ scenario=0
 t=0
 echo "Scenario $scenario ====="
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals" |grep -q "error" && echo OK || echo FAIL
+curl_get terminals | grep $q "error" && echo OK || echo FAIL
+#curl -X GET -ss "$server/terminals" |grep $q "error" && echo OK || echo FAIL
 sleep .5
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals/0" |grep -q "error" && echo OK || echo FAIL
+curl_get "terminals/0" | grep $q "error" && echo OK || echo FAIL
+#curl -X GET -ss "$server/terminals/0" |grep $q "error" && echo OK || echo FAIL
 sleep .5
 #end
 
@@ -40,22 +69,24 @@ sleep .5
 # test 2: query /terminals/0 - should be no error
 
 #begin
-scenario=$(($scenarioi + 1))
+scenario=$(($scenario + 1))
 t=0
 echo "Scenario $scenario ====="
 echo -n "   Test $t ... "
-curl -X POST -ss $server/terminal |grep "terminalID" -q && echo OK || echo FAIL
+echo "curl_post \"x\" \"terminal\" |grep $q \"TerminalID\" && echo OK || echo FAIL"
+curl_post "x" "terminal" |grep $q "TerminalID" && echo OK || echo FAIL
 sleep .1
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals" |grep "TerminalID"|grep -q "0" && echo OK || echo FAIL
+curl_get "terminals" |grep "TerminalID"|grep $q "0" && echo OK || echo FAIL
 sleep .1
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals/0" |grep "error" -q && echo FAIL || echo OK
+curl_get "terminals/0" |grep $q "error" && echo FAIL || echo OK
 sleep .1
 # end
 
+exit 0
 # Scenario 2
 # create 10 more terminals by POSTing to /terminal 10 times
 # test 0: query /terminals - there should be 11 terminals
@@ -68,10 +99,10 @@ t=0
 echo "Scenario $scenario ====="
 echo -n "   Test $t ... "
 for i in $(seq 1 10); do
-	curl -X POST -ss $server/terminal > /dev/null
+	curl_post ' ' "terminal"
 	sleep .1
 done
-lines=$(curl -X GET -ss $server/terminals|grep "TerminalID"|wc -l)
+lines=$(curl_get terminals|grep "TerminalID"|wc -l)
 if [[ $lines -eq 11 ]]; then
 	echo OK
 else
@@ -79,11 +110,11 @@ else
 fi
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals" |grep "TerminalID"|grep -q "10" && echo OK || echo FAIL
+curl_get "terminals" |grep "TerminalID"|grep $q "10" && echo OK || echo FAIL
 sleep .1
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals" |grep "TerminalID"|grep -q "11" && echo FAIL || echo OK
+curl_get "terminals" |grep "TerminalID"|grep $q "11" && echo FAIL || echo OK
 sleep .1
 #end
 
@@ -99,10 +130,10 @@ t=0
 echo "Scenario $scenario ====="
 echo -n "   Test $t ... "
 for i in $(seq 1 $MAX_TERMINALS); do
-	curl -X POST -ss $server/terminal > /dev/null
+	curl_post ' ' terminal
 	sleep .1
 done
-lines=$(curl -X GET -ss $server/terminals|grep "TerminalID"|wc -l)
+lines=$(curl_get terminals|grep "TerminalID"|wc -l)
 if [[ $lines -eq $MAX_TERMINALS ]]; then
 	echo OK
 else
@@ -110,10 +141,10 @@ else
 fi
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals" |grep "TerminalID"|grep -q "$MAX_TERMINALS" && echo FAIL || echo OK
+curl_get "terminals" |grep "TerminalID"|grep $q "$MAX_TERMINALS" && echo FAIL || echo OK
 sleep .1
 t=$(($t + 1))
 echo -n "   Test $t ... "
-curl -X GET -ss "$server/terminals" |grep "TerminalID"|grep -q "$(($MAX_TERMINALS - 1))" && echo OK || echo FAIL
+curl_get "terminals" |grep "TerminalID"|grep $q "$(($MAX_TERMINALS - 1))" && echo OK || echo FAIL
 sleep .1
 #end
