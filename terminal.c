@@ -50,7 +50,7 @@ int list_terminals(char *data, const int max_data){
 	}
 	int data_len = sprintf(data,"\"terminals\":[\n");
 	for(i=0;i<=last_terminal;i++){
-		int len = sprintf(tmp,"\"TerminalID\":\"%04d\"},\n",terminals[i].id);
+		int len = sprintf(tmp,"{\"TerminalID\":\"%04d\"},\n",terminals[i].id);
 		if(i == last_terminal) tmp[len - 2] = ' ';
 		memcpy(data + data_len , tmp, strlen(tmp));
 		data_len += len;
@@ -101,7 +101,7 @@ void show_terminal_info(char* tmp, int id){
 	printf("list transactions with max data %d\n",MAX_DATA);
 	if(list_transactions(id,data,MAX_DATA) == -1){
 		printf("no transactions\n");
-		sprintf(data,"\"Transactions\":[]");	
+		sprintf(data,"[]");	
 	}
 	printf("end list transactions\n");
 	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);

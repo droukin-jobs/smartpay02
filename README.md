@@ -1,6 +1,8 @@
 ## Dmitri Roukin for Smartpay 20-04-2018
 
-[Download:]`git clone https://github.com/droukin-jobs/smartpay01.git`
+[Download:]`git clone https://github.com/droukin-jobs/smartpay02.git`
+
+## *This README document is based on old version (smartpay01), there maybe some obsolete infomration*
 
 TOC
 
@@ -23,19 +25,20 @@ At the moment the following features are complete:
  - Each connection runs in it's own thread
  - Tests for helper functions
  - Documentation (you are reading it)
+ - Terminals structure is able to accept transactions
+ - JSON POST input to update transactions via `"json={...}"`
 
 Partially complete features:
  - Terminal creation is done only by empty POST request to `/terminal` endpoint
- - Terminals have only dummy transactions
- - Terminals structure is able to accept transactions, but the actual mechanism is not ready
 
 Not implemented features:
  - JSON POST input to create terminals
- - JSON POST input to update transactions
  - Comprehensive main program testing
  - Server config options (not required for the project but would be nice to have)
+ - Needs JSON syntax checker
 
-In order to fullfil the requirements i will need to provide a way of parsing JSON data and make sure the POST data processing is safe and reliable. Right now the POST processing is being worked upon but is still quite unstable, so it is commented out in the `main.c`. Also will need to develop a thread management system to monitor server load. 
+This version is based on a different approach to POST processing. The bsae is taken from `post_example.c` at the docs directory of libmicrohttpd source.
+
 
 ### Assumptions and notes
 
@@ -84,7 +87,10 @@ After launching the server will be available on port 8888. For GET requests you 
  ```
 For POST requests use curl or similar programm:
 ```
- curl -X POST localhost:8888/terminal 	create new terminal
+ curl -X POST -d "json={}" localhost:8888/terminal 	create new terminal
+```
+```
+ curl -X POST -d "json={'CardType':'Visa','TransactionType':'Credit'}" localhost:8888/terminals{id} 	create new terminal
 ```
 
 To stop the server please press a key in the server's terminal. 
