@@ -144,3 +144,45 @@ echo -n "   Test $t ... "
 curl_get "terminals" |grep "TerminalID"|grep $q "$(($MAX_TERMINALS - 1))" && echo OK || echo FAIL
 sleep .1
 #end
+
+# Scenario 4
+# create some transaction data and display result
+# test 0: create 2 MasterCard/Credit transactions for term 0
+# test 1: create 2 EFTOPS/savings transactions for term 0
+# test 2: create 20 Visa transactions for all terms
+
+
+#begin
+scenario=$(($scenario + 1))
+t=0
+echo "Scenario $scenario ====="
+echo -n "   Test $t ... "
+curl_post "$t_m" "terminals/0" > /dev/null
+curl_post "$t_m" "terminals/0" > /dev/null
+lines=$(curl_get terminals/0|grep "MasterCard"|grep "Credit"|wc -l)
+if [[ $lines -eq 2 ]]; then
+	echo OK
+else
+	echo FAIL
+fi
+t=$(($t + 1))
+echo -n "   Test $t ... "
+curl_post "$t_s" "terminals/0" > /dev/null
+curl_post "$t_s" "terminals/0" > /dev/null
+lines=$(curl_get terminals/0|grep "EFTPOS"|grep "Savings"|wc -l)
+if [[ $lines -eq 2 ]]; then
+	echo OK
+else
+	echo FAIL
+fi
+
+exit 0
+t=$(($t + 1))
+max=$(expr $MAX_TERMINALS - 1)
+for i in $(seq 0 $max); do
+	for j in $(seq 1 20); do
+	curl_post "$t_v" "terminals/$i"
+	done
+done
+#end
+
