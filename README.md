@@ -46,6 +46,8 @@ The project is supposed to compile and run on a `POSIX` compatible system, with 
 
 Successfuly tested on `Slackware Linux 3.9.5 #2 SMP x86_64 i5-3470 CPU @ 3.20GHz` and `Darwin 14.3.0 PDT 2015 x86_64`
 
+This is work in progress so occasional bugs may creep in at the most unexpected places.
+
 ---
 ## 2 COMPILE
 
@@ -87,7 +89,7 @@ After launching the server will be available on port 8888. For GET requests you 
  ```
 For POST requests use curl or similar programm:
 ```
- curl -X POST -d "json={}" localhost:8888/terminal 	create new terminal
+ curl -X POST -d " " localhost:8888/terminal 	create new terminal
 ```
 ```
  curl -X POST -d "json={'CardType':'Visa','TransactionType':'Credit'}" localhost:8888/terminals{id} 	create new terminal
@@ -97,6 +99,7 @@ To stop the server please press a key in the server's terminal.
 
 #Important: use `application/x-www-form-urlencoded` for Content Type
 
+Input and output were tested using `curl`, `tests/test_scenarios.sh`  and `RESTED` addon for Firefox.
 
 ---
 ## 5 TESTING
@@ -109,7 +112,7 @@ Runtime tests are in `tests/test_scenarios.sh`
 All function tests are in file `tests/test.c`
 - At the moment there are only helper function tests checking for validity of input and some boundary conditions.
 - Use `tests/makefile` to compile the tests
-- Use `tests/test binary` to run tests
+- Use `tests/test` binary to run tests
 
 Note: `json_float_test` fails due to floating point format not being carefully specified, but this function is not used in the project and there fore will not be fixed in the nearest future.
 
