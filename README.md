@@ -26,18 +26,17 @@ At the moment the following features are complete:
  - Tests for helper functions
  - Documentation (you are reading it)
  - Terminals structure is able to accept transactions
- - JSON POST input to update transactions via `"json={...}"`
+ - JSON POST input to update transactions via "json={...}"
 
 Partially complete features:
  - Terminal creation is done only by empty POST request to `/terminal` endpoint
 
 Not implemented features:
- - JSON POST input to create terminals
  - Comprehensive main program testing
  - Server config options (not required for the project but would be nice to have)
  - Needs JSON syntax checker
 
-This version is based on a different approach to POST processing. The bsae is taken from `post_example.c` at the docs directory of libmicrohttpd source.
+This version is based on a different approach to POST processing. The base is taken from `post_example.c` at the docs directory of libmicrohttpd source.
 
 
 ### Assumptions and notes
