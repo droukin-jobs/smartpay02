@@ -95,6 +95,9 @@ For POST requests use curl or similar programm:
 
 To stop the server please press a key in the server's terminal. 
 
+#Important: use `application/x-www-form-urlencoded` for Content Type
+
+
 ---
 ## 5 TESTING
 
