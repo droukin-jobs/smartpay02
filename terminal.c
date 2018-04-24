@@ -50,7 +50,9 @@ int list_terminals(char *data, const int max_data){
 	}
 	int data_len = sprintf(data,"\"terminals\":[\n");
 	for(i=0;i<=last_terminal;i++){
+		printf("List terminal %d of %d, ",i,last_terminal);
 		int len = sprintf(tmp,"{\"TerminalID\":\"%04d\"},\n",terminals[i].id);
+		printf("Line %s, memory used: %d / %d, last 24 chars: %s\n", tmp, data_len,max_data,data + data_len - 24);
 		if(i == last_terminal) tmp[len - 2] = ' ';
 		memcpy(data + data_len , tmp, strlen(tmp));
 		data_len += len;

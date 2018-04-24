@@ -62,7 +62,7 @@ send_page (struct MHD_Connection *connection, const char *page)
 
   response =
     MHD_create_response_from_buffer (strlen (page), (void *) page,
-			     MHD_RESPMEM_PERSISTENT);
+			     MHD_RESPMEM_MUST_COPY);
   if (!response){
 		printf("response = null\n");
 		return MHD_NO;
@@ -70,6 +70,8 @@ send_page (struct MHD_Connection *connection, const char *page)
   }
 
   //MHD_add_response_header(response, "Content-Type","application/json");
+  MHD_add_response_header(response, "Cache-Control","no-cache");
+
   ret = MHD_queue_response (connection, MHD_HTTP_OK, response);
   MHD_destroy_response (response);
 
@@ -274,11 +276,15 @@ main ()
 {
   struct MHD_Daemon *daemon;
 	init();//init terminal data
-  daemon = MHD_start_daemon (MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD, PORT, NULL, NULL,
+  daemon = MHD_start_daemon (MHD_USE_AUTO | MHD_USE_THREAD_PER_CONNECTION, PORT, NULL, NULL,
                              &answer_to_connection, NULL,
                              MHD_OPTION_NOTIFY_COMPLETED, request_completed,
                              NULL, MHD_OPTION_END);
-  if (NULL == daemon)
+ /* daemon = MHD_start_daemon (MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD, PORT, NULL, NULL,
+                             &answer_to_connection, NULL,
+                             MHD_OPTION_NOTIFY_COMPLETED, request_completed,
+                             NULL, MHD_OPTION_END);
+  */if (NULL == daemon)
     return 1;
 
   (void) getchar ();

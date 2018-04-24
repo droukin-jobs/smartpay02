@@ -21,19 +21,17 @@ t_m="json={'CardType':'MasterCard','TransactionType':'Credit'}" #MAsterCard:Cred
 t_s="json={'CardType':'EFTPOS','TransactionType':'Savings'}"	#Eftpos:Savings
 t_c="json={'CardType':'EFTPOS','TransactionType':'Cheque'}"		#EFtpos:Cheque
 post_data=""
-q=""
+q="-q"
 
 curl_post() {
 
 	data=$1
 	url=$2
 	
-	echo "curl -ss -X POST -d "$data" $server/$url > /dev/null"
 	curl -ss -X POST -d "$data" $server/$url
 }
 curl_get() {
 	url=$1
-	echo "curl -ss -X GET $server/$url > /dev/null"
 	curl -ss -X GET $server/$url
 }
 
@@ -73,8 +71,7 @@ scenario=$(($scenario + 1))
 t=0
 echo "Scenario $scenario ====="
 echo -n "   Test $t ... "
-echo "curl_post \"x\" \"terminal\" |grep $q \"TerminalID\" && echo OK || echo FAIL"
-curl_post "x" "terminal" |grep $q "TerminalID" && echo OK || echo FAIL
+curl_post "" "terminal" |grep $q "TerminalID" && echo OK || echo FAIL
 sleep .1
 t=$(($t + 1))
 echo -n "   Test $t ... "
@@ -86,7 +83,6 @@ curl_get "terminals/0" |grep $q "error" && echo FAIL || echo OK
 sleep .1
 # end
 
-exit 0
 # Scenario 2
 # create 10 more terminals by POSTing to /terminal 10 times
 # test 0: query /terminals - there should be 11 terminals
@@ -130,7 +126,7 @@ t=0
 echo "Scenario $scenario ====="
 echo -n "   Test $t ... "
 for i in $(seq 1 $MAX_TERMINALS); do
-	curl_post ' ' terminal
+	curl_post ' ' terminal > /dev/null
 	sleep .1
 done
 lines=$(curl_get terminals|grep "TerminalID"|wc -l)
