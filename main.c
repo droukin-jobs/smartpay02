@@ -62,14 +62,14 @@ send_page (struct MHD_Connection *connection, const char *page)
 
   response =
     MHD_create_response_from_buffer (strlen (page), (void *) page,
-				     MHD_RESPMEM_PERSISTENT);
+			     MHD_RESPMEM_PERSISTENT);
   if (!response){
 		printf("response = null\n");
 		return MHD_NO;
 
   }
 
-  MHD_add_response_header(response, "Content-Type","application/json");
+  //MHD_add_response_header(response, "Content-Type","application/json");
   ret = MHD_queue_response (connection, MHD_HTTP_OK, response);
   MHD_destroy_response (response);
 
@@ -153,20 +153,26 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
   	(void)url;               /* Unused. Silent compiler warning. */
   	(void)version;           /* Unused. Silent compiler warning. */
 
+printf("Answering connection\n");
 	//check if session just started
 	if (NULL == *con_cls){
+		printf("con_cls = NULL\n");
 		struct connection_info_struct *con_info;
 		con_info = malloc (sizeof (struct connection_info_struct));
-		if (NULL == con_info) //cant allocate memory
+		if (NULL == con_info){
+			printf("cant allocate memory for con_cls\n");
 			return MHD_NO;
+		}
 		con_info->cidata = NULL;
 		if (0 == strcmp (method, "POST")){
-			//setup post processor
+			printf("setup post processor\n");
 			con_info->pp = MHD_create_post_processor (connection, POSTBUFFERSIZE, iterate_post, (void *) con_info);
 			if (NULL == con_info->pp){
+				printf("cant create PP\n");
 				free (con_info);
 				return MHD_NO;
 			}
+			printf("We are here!\n");
 			con_info->citype = POST;
 		}else
 			con_info->citype = GET;
@@ -239,7 +245,7 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 						else json_error(tmp,"Could not create transaction");
 					}else{
 						json_error(tmp,"Invalid transaction");
-					}	
+					}
 				}
 			}
 		}else if(uinfo & URL_TERMINALS){        //cannot use POST for listing info
