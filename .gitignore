@@ -4,3 +4,4 @@
 ./simplepost.c
 ./post_example.c
 ./*.swp
+./pack

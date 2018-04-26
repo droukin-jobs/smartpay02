@@ -3,6 +3,10 @@
 #include "terminal.h"
 #include "json.h"
 
+#ifdef PACK
+#include "packer.h"
+#endif
+
 //terminal array
 #define MAX_DATA 4096
 static terminal_type terminals[MAX_TERMINALS];
@@ -18,25 +22,6 @@ int add_terminal(){
 	terminals[i].last_transaction = -1;
 	printf(" done\n");
 	return i;
-}
-
-// adds transaction to a terminal
-// not fully implemented 
-int add_transaction(int terminal, int card, int acct){
-	int id = terminal;
-	int i = id;
-	printf("add transaction (%d,%d) for term %d of %d\n",card,acct,i,last_terminal);	
-	if(terminal > last_terminal) return -1;
-	printf("MAX = %d, transaction = %d\n", MAX_TRANSACTIONS, terminals[i].last_transaction);	
-	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
-	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
-	terminals[i].last_transaction += 1;
-	int j = terminals[i].last_transaction;	
-	terminals[i].transactions[j].id = j;
-	terminals[i].transactions[j].card = card;
-	terminals[i].transactions[j].acct = acct;
-	printf("added transaction %d\n",j);
-	return j;
 }
 
 // lists terminals as json objects
@@ -61,6 +46,25 @@ int list_terminals(char *data, const int max_data){
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
 	return last_terminal;
+}
+#ifndef PACK
+// adds transaction to a terminal
+// not fully implemented 
+int add_transaction(int terminal, int card, int acct){
+	int id = terminal;
+	int i = id;
+	printf("add transaction (%d,%d) for term %d of %d\n",card,acct,i,last_terminal);	
+	if(terminal > last_terminal) return -1;
+	printf("MAX = %d, transaction = %d\n", MAX_TRANSACTIONS, terminals[i].last_transaction);	
+	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
+	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
+	terminals[i].last_transaction += 1;
+	int j = terminals[i].last_transaction;	
+	terminals[i].transactions[j].id = j;
+	terminals[i].transactions[j].card = card;
+	terminals[i].transactions[j].acct = acct;
+	printf("added transaction %d\n",j);
+	return j;
 }
 
 int list_transactions(int id, char *data, const int max_data){
@@ -90,6 +94,7 @@ int list_transactions(int id, char *data, const int max_data){
 	printf("DATA %s\n",data);
 	return lt;
 }
+//
 // shows terminal json object with dummy (at the moment) transactions
 void show_terminal_info(char* tmp, int id){
 	
@@ -109,6 +114,77 @@ void show_terminal_info(char* tmp, int id){
 	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
 	printf("TMP %s\n",tmp);
 }
+
+#else
+// use PACK algorithm
+//
+// adds transaction to a terminal
+// not fully implemented 
+int add_transaction(int terminal, int card, int acct){
+	int id = terminal;
+	int i = id;
+	printf("PACK add transaction (%d,%d) for term %d of %d\n",card,acct,i,last_terminal);	
+	if(terminal > last_terminal) return -1;
+	printf("PACK MAX = %d, transaction = %d\n", MAX_TRANSACTIONS, terminals[i].last_transaction);	
+	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
+	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
+	terminals[i].last_transaction += 1;
+	int j = terminals[i].last_transaction;	
+	terminals[i].transactions[j >> 1] |= PACK_CARD(j,card);
+	terminals[i].transactions[j >> 1] |= PACK_ACCT(j,acct);
+	printf("PACK added transaction %d, card=%d, acct=%d, value=%u\n",j,card,acct,(unsigned int)(terminals[i].transactions[j >> 1]));
+	return j;
+}
+
+int list_transactions(int id, char *data, const int max_data){
+	int i;
+	char tmp[100];
+	int lt = terminals[id].last_transaction;
+	printf("PACK list transactions lt=%d\n",lt);
+	if(lt == -1){
+		return lt;
+	}
+	printf("PACK list transaction for term %d\n",id);
+	int data_len = sprintf(data,"[\n");
+	for(i=0;i<=lt;i++){
+		printf("PACK listing transaction %d of %d, value %u\n",i, lt,(unsigned int)(terminals[id].transactions[i]));
+		int c_id = UNPACK_CARD(i,terminals[id].transactions[i>>1]);
+		int a_id = UNPACK_ACCT(i,terminals[id].transactions[i>>1]);
+		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
+		if(i == lt) tmp[len - 2] = ' ';
+		printf("PACK about to update data \n |%s|\n %d chars at %d\n",tmp, len, data_len);
+		memcpy(data + data_len , tmp, len);
+		printf("PACK updated data\n");
+		data_len += len;
+		if(data_len > max_data - len -2 ) break;
+	}
+	data[data_len] = ']';
+	data[data_len+1] = '\0';
+	printf("PACK DATA %s\n",data);
+	return lt;
+}
+
+
+// shows terminal json object with dummy (at the moment) transactions
+void show_terminal_info(char* tmp, int id){
+	
+	if(id > last_terminal){
+		printf("invalid id %d of %d\n",id, last_terminal);
+		json_error(tmp,"Invalid terminal");
+		return;
+	}
+	printf("show term info id %d\n",id);
+	char *data = (char*)malloc(MAX_DATA);
+	printf("list transactions with max data %d\n",MAX_DATA);
+	if(list_transactions(id,data,MAX_DATA) == -1){
+		printf("no transactions\n");
+		sprintf(data,"[]");	
+	}
+	printf("end list transactions\n");
+	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
+	printf("TMP %s\n",tmp);
+}
+#endif
 
 void init(void){
 	sprintf(cards[0],"MasterCard");

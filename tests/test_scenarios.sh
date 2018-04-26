@@ -149,7 +149,8 @@ sleep .1
 # create some transaction data and display result
 # test 0: create 2 MasterCard/Credit transactions for term 0
 # test 1: create 2 EFTOPS/savings transactions for term 0
-# test 2: create 20 Visa transactions for all terms
+# test 2: create 20 Visa transactions for all terms,
+# 	take random terminal, there should be 20 Visa trasnactions, all type Credit
 
 
 #begin
@@ -176,13 +177,24 @@ else
 	echo FAIL
 fi
 
-exit 0
 t=$(($t + 1))
 max=$(expr $MAX_TERMINALS - 1)
 for i in $(seq 0 $max); do
 	for j in $(seq 1 20); do
-	curl_post "$t_v" "terminals/$i"
+	curl_post "$t_v" "terminals/$i" > /dev/null
 	done
 done
+
+random=$(( ( RANDOM % $MAX_TERMINALS ) ))
+
+count=$(curl_get "terminals/$random" | grep "Visa"|grep "Credit"|wc -l)
+
+if [[ $count -eq 20 ]]; then
+	echo OK
+else
+	echo FAIL
+fi
+
 #end
+exit 0
 
