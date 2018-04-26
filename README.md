@@ -27,6 +27,8 @@ At the moment the following features are complete:
  - Documentation (you are reading it)
  - Terminals structure is able to accept transactions
  - JSON POST input to update transactions via "json={...}"
+ - *NEW* Now using PACK option to reduce transaction data footprint (by including `packer.h` file from my [packer project](https://github.com/droukin-jobs/packer)
+
 
 Partially complete features:
  - Terminal creation is done only by empty POST request to `/terminal` endpoint
