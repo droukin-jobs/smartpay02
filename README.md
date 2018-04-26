@@ -68,6 +68,7 @@ These files required for compilation:
  - `json.c json.h` 		= json utility functions
  - `url.c url.h` 		= url processing functions
  - `terminal.c terminal.h` = terminal operations 
+ - `packer.h`			= contains preprocessor macros for PACK algorythm (used for trasnaction storage)
  - `makefile` 			= can be used for compiling and some runtime testing
 
 To compile main project use the makefile and GNU make in the projects root directory
