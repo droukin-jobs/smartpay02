@@ -178,6 +178,7 @@ else
 fi
 
 t=$(($t + 1))
+echo -n "   Test $t ... "
 max=$(expr $MAX_TERMINALS - 1)
 for i in $(seq 0 $max); do
 	for j in $(seq 1 20); do
