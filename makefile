@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-c -Wall -DPACK
+CFLAGS=-c -Wall -DPACK -O
 LDFLAGS=-lmicrohttpd
 SRS=json.c url.c terminal.c main.c
 OBJ=$(SRS:.c=.o)
