@@ -100,35 +100,37 @@ void show_terminal_info(char* tmp, int id){
 // use PACK algorithm
 //
 // adds transaction to a terminal
-// not fully implemented 
-int add_transaction(int terminal, int card, int acct){
-	int id = terminal;
-	int i = id;
-	if(terminal > last_terminal) return -1;
-	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
+// return last transaction if successful, -1 if not
+int add_transaction(int id, int card, int acct){
+	if(id > last_terminal) return -1;
+	if((MAX_TRANSACTIONS - 1 ) <= terminals[id].last_transaction) return -1;
 	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
-	terminals[i].last_transaction += 1;
-	int j = terminals[i].last_transaction;	
-	terminals[i].transactions[j >> 1] |= PACK_CARD(j,card);
-	terminals[i].transactions[j >> 1] |= PACK_ACCT(j,acct);
+	terminals[id].last_transaction += 1;
+	int j = terminals[id].last_transaction;	
+	terminals[id].transactions[j >> 1] |= PACK_CARD(j,card);
+	terminals[id].transactions[j >> 1] |= PACK_ACCT(j,acct);
 	return j;
 }
 
+// copy stransaction data in JSON format to data param
+
 int list_transactions(int id, char *data, const int max_data){
-	int i;
-	char tmp[100];
+	char tmp[100]; //temporary var to store transaction data
 	int lt = terminals[id].last_transaction;
 	if(lt == -1){
 		return lt;
 	}
 	int data_len = sprintf(data,"[\n");
+	int i;
 	for(i=0;i<=lt;i++){
+		//extract transaction data 
 		int c_id = UNPACK_CARD(i,terminals[id].transactions[i>>1]);
 		int a_id = UNPACK_ACCT(i,terminals[id].transactions[i>>1]);
 		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		if(i == lt) tmp[len - 2] = ' ';
+		if(i == lt) tmp[len - 2] = ' '; //last transaction does not need comma
 		memcpy(data + data_len , tmp, len);
 		data_len += len;
+		//check if possible to add more transactions to data param
 		if(data_len > max_data - len -2 ) break;
 	}
 	data[data_len] = ']';
@@ -137,7 +139,7 @@ int list_transactions(int id, char *data, const int max_data){
 }
 
 
-// shows terminal json object with dummy (at the moment) transactions
+// shows terminal json object with transactions
 void show_terminal_info(char* tmp, int id){
 	
 	if(id > last_terminal){
