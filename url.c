@@ -43,7 +43,7 @@ int url_get_id(const char* url){
 	int len = strlen("/terminals/");
 	if(strlen(url) < len) return -1;
 	char *id = (char*)malloc(strlen(url) - len + 1);
-	sprintf(id,url + len);
+	sprintf(id,"%s",url + len);
 	int term_id = atoi(id);
 	if(term_id == 0){
 		if(strcmp(id,"0") != 0) return -1;

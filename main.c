@@ -52,6 +52,7 @@ static int
 send_page (struct MHD_Connection *connection, const char *page){
 	int ret;
 	struct MHD_Response *response;
+	// output in JSON format
 	char *tmp=(char*)malloc(strlen(page) + 4);
 	sprintf(tmp,json_page,page);
 
@@ -185,12 +186,14 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 						if(strstr(con_info->cidata,cards[i]) != NULL){
 							c_id = i;
 							sprintf(c,"%s",cards[i]);
+							break;
 						}
 					}
 					for(i=0;i<3;i++){
 						if(strstr(con_info->cidata,accts[i])!=NULL){
 							a_id = i;
 							sprintf(a,"%s",accts[i]);
+							break;
 						}
 					}
 					if(c_id != -1 && a_id != -1) {

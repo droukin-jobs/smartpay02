@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include "terminal.h"
 #include "json.h"
-
-#ifdef PACK
 #include "packer.h"
-#endif
 
 //terminal array
 #define MAX_DATA 4096
@@ -27,7 +24,7 @@ int add_terminal(){
 // aborts (gracefully) execution if reached limit
 int list_terminals(char *data, const int max_data){
 	int i;
-	char tmp[24];
+	char tmp[24]; //placeholder for terminal id
 	if(last_terminal == -1){
 		return last_terminal;
 	}
@@ -35,70 +32,14 @@ int list_terminals(char *data, const int max_data){
 	for(i=0;i<=last_terminal;i++){
 		int len = sprintf(tmp,"{\"TerminalID\":\"%04d\"},\n",terminals[i].id);
 		memcpy(data + data_len , tmp, strlen(tmp));
-		data_len += len;
+		data_len += len; //update data pointer
 		if(data_len > max_data - len -2 ) break;
 	}
-	data[data_len - 2] = ' ';
+	data[data_len - 2] = ' '; //remove last comma
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
 	return last_terminal;
 }
-#ifndef PACK
-// adds transaction to a terminal
-// not fully implemented 
-int add_transaction(int terminal, int card, int acct){
-	int id = terminal;
-	int i = id;
-	if(terminal > last_terminal) return -1;
-	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
-	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
-	terminals[i].last_transaction += 1;
-	int j = terminals[i].last_transaction;	
-	terminals[i].transactions[j].id = j;
-	terminals[i].transactions[j].card = card;
-	terminals[i].transactions[j].acct = acct;
-	return j;
-}
-
-int list_transactions(int id, char *data, const int max_data){
-	int i;
-	char tmp[100];
-	int lt = terminals[id].last_transaction;
-	if(lt == -1){
-		return lt;
-	}
-	int data_len = sprintf(data,"[\n");
-	for(i=0;i<=lt;i++){
-		int c_id = terminals[id].transactions[i].card;
-		int a_id = terminals[id].transactions[i].acct;
-		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		memcpy(data + data_len , tmp, len);
-		data_len += len;
-		if(data_len > max_data - len -2 ) break;
-	}
-	data[data_len - 2] = ' ';
-	data[data_len] = ']';
-	data[data_len+1] = '\0';
-	return lt;
-}
-//
-// shows terminal json object with dummy (at the moment) transactions
-void show_terminal_info(char* tmp, int id){
-	
-	if(id > last_terminal){
-		json_error(tmp,"Invalid terminal");
-		return;
-	}
-	char *data = (char*)malloc(MAX_DATA);
-	if(list_transactions(id,data,MAX_DATA) == -1){
-		sprintf(data,"[]");	
-	}
-	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
-}
-
-#else
-// use PACK algorithm
-//
 // adds transaction to a terminal
 // return last transaction if successful, -1 if not
 int add_transaction(int id, int card, int acct){
@@ -112,7 +53,7 @@ int add_transaction(int id, int card, int acct){
 	return j;
 }
 
-// copy stransaction data in JSON format to data param
+// copy transaction data in JSON format to data param
 
 int list_transactions(int id, char *data, const int max_data){
 	char tmp[100]; //temporary var to store transaction data
@@ -128,7 +69,7 @@ int list_transactions(int id, char *data, const int max_data){
 		int a_id = UNPACK_ACCT(i,terminals[id].transactions[i>>1]);
 		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
 		memcpy(data + data_len , tmp, len);
-		data_len += len;
+		data_len += len;//update data pointer
 		//check if possible to add more transactions to data param
 		if(data_len > max_data - len -2 ) break;
 	}
@@ -152,8 +93,9 @@ void show_terminal_info(char* tmp, int id){
 	}
 	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
 }
-#endif
 
+
+// init cards and accts arrays
 void init(void){
 	sprintf(cards[0],"MasterCard");
 	sprintf(cards[1],"Visa");

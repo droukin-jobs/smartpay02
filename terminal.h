@@ -12,23 +12,9 @@ char accts[3][11];
 
 typedef struct {
 int id;
-int card;
-int acct;
-} transaction_type;
-
-#ifndef PACK
-typedef struct {
-int id;
-transaction_type transactions[MAX_TRANSACTIONS];
-int last_transaction;
-} terminal_type;
-#else
-typedef struct {
-int id;
 unsigned char transactions[MAX_TRANSACTIONS];
 int last_transaction;
 } terminal_type;
-#endif //#ifndef PACK
 
 int add_terminal();
 int add_transaction(int terminal, int card, int acct);
