@@ -104,3 +104,27 @@ void init(void){
 	sprintf(accts[1],"Savings");
 	sprintf(accts[2],"Cheque");
 }
+
+
+void get_ids(int* c_id, int* a_id, const char* url){
+	int i;
+	//temporary vars to hold terminal data
+	char c[50];
+	char a[50];
+	*c_id = -1;
+	*a_id = -1;
+	for(i=0;i<3;i++){
+		if(strstr(url,cards[i]) != NULL){
+			*c_id = i;
+			sprintf(c,"%s",cards[i]);
+			break;
+		}
+	}
+	for(i=0;i<3;i++){
+		if(strstr(url,accts[i])!=NULL){
+			*a_id = i;
+			sprintf(a,"%s",accts[i]);
+			break;
+		}
+	}
+}

@@ -176,31 +176,11 @@ answer_to_connection (void *cls, struct MHD_Connection *connection,
 					return MHD_YES;
 				}else if (NULL != con_info->cidata){
 					//data is ready to be processed
-					int i;
 					int c_id=-1;
 					int a_id=-1;
-					//temporary vars to hold terminal data
-					char c[50];
-					char a[50];
-					for(i=0;i<3;i++){
-						if(strstr(con_info->cidata,cards[i]) != NULL){
-							c_id = i;
-							sprintf(c,"%s",cards[i]);
-							break;
-						}
-					}
-					for(i=0;i<3;i++){
-						if(strstr(con_info->cidata,accts[i])!=NULL){
-							a_id = i;
-							sprintf(a,"%s",accts[i]);
-							break;
-						}
-					}
-					if(c_id != -1 && a_id != -1) {
-						if(add_transaction(id,c_id,a_id)!=-1){
-							show_terminal_info(tmp,id);
-						}
-						else json_error(tmp,"Could not create transaction");
+					get_ids(&c_id, &a_id, con_info->cidata);
+					if(add_transaction(id,c_id,a_id)!=-1){
+						show_terminal_info(tmp,id);
 					}else{
 						json_error(tmp,"Invalid transaction");
 					}
