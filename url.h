@@ -1,3 +1,6 @@
+#ifndef _url_h
+#define _url_h
+
 #define METHOD_GET (1<<0)
 #define METHOD_POST (1<<1)
 #define URL_TERMINALS (1<<2)
@@ -8,3 +11,5 @@
 
 int url_get_info(const char* url, const char* method);
 int url_get_id(const char* url);
+
+#endif //ifndef _url_h

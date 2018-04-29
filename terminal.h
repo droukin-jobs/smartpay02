@@ -6,10 +6,6 @@
 //strlen of json {\n\"terminalID\":\"0000\"\n} 
 #define MAX_TERMINAL_SIZE 25
 
-static const char *terminal_create = "{\"cardType\":[\"Visa\",\"MasterCard\",\"EFTPOS\"],\"TransactionType\":[\"Cheque\",\"Savings\",\"Credit\"]}";   
-enum en_cardsy$ {Visa,MasterCard,EFTPOS};
-enum en_accts {Credit,Cheque,Savings};
-
 char cards[3][11];
 char accts[3][11];
 

@@ -29,10 +29,7 @@
 #endif
 
 #define PORT            8888
-//#define POSTBUFFERSIZE  512
 #define POSTBUFFERSIZE  1024
-#define MAXNAMESIZE     20
-//#define MAXANSWERSIZE   512
 #define MAXANSWERSIZE   1024
 
 #define GET             0

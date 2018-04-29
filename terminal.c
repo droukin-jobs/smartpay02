@@ -34,11 +34,11 @@ int list_terminals(char *data, const int max_data){
 	int data_len = sprintf(data,"\"terminals\":[\n");
 	for(i=0;i<=last_terminal;i++){
 		int len = sprintf(tmp,"{\"TerminalID\":\"%04d\"},\n",terminals[i].id);
-		if(i == last_terminal) tmp[len - 2] = ' ';
 		memcpy(data + data_len , tmp, strlen(tmp));
 		data_len += len;
 		if(data_len > max_data - len -2 ) break;
 	}
+	data[data_len - 2] = ' ';
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
 	return last_terminal;
@@ -72,11 +72,11 @@ int list_transactions(int id, char *data, const int max_data){
 		int c_id = terminals[id].transactions[i].card;
 		int a_id = terminals[id].transactions[i].acct;
 		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		if(i == lt) tmp[len - 2] = ' ';
 		memcpy(data + data_len , tmp, len);
 		data_len += len;
 		if(data_len > max_data - len -2 ) break;
 	}
+	data[data_len - 2] = ' ';
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
 	return lt;
@@ -127,12 +127,12 @@ int list_transactions(int id, char *data, const int max_data){
 		int c_id = UNPACK_CARD(i,terminals[id].transactions[i>>1]);
 		int a_id = UNPACK_ACCT(i,terminals[id].transactions[i>>1]);
 		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		if(i == lt) tmp[len - 2] = ' '; //last transaction does not need comma
 		memcpy(data + data_len , tmp, len);
 		data_len += len;
 		//check if possible to add more transactions to data param
 		if(data_len > max_data - len -2 ) break;
 	}
+	data[data_len - 2] = ' '; //last transaction does not need comma
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
 	return lt;
