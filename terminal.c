@@ -106,7 +106,9 @@ void init(void){
 }
 
 
-void get_ids(int* c_id, int* a_id, const char* url){
+// get card and acct ids from json string 
+
+void get_ids(int* c_id, int* a_id, const char* data){
 	int i;
 	//temporary vars to hold terminal data
 	char c[50];
@@ -114,14 +116,14 @@ void get_ids(int* c_id, int* a_id, const char* url){
 	*c_id = -1;
 	*a_id = -1;
 	for(i=0;i<3;i++){
-		if(strstr(url,cards[i]) != NULL){
+		if(strstr(data,cards[i]) != NULL){
 			*c_id = i;
 			sprintf(c,"%s",cards[i]);
 			break;
 		}
 	}
 	for(i=0;i<3;i++){
-		if(strstr(url,accts[i])!=NULL){
+		if(strstr(data,accts[i])!=NULL){
 			*a_id = i;
 			sprintf(a,"%s",accts[i]);
 			break;

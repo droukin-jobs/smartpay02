@@ -21,5 +21,5 @@ int add_transaction(int terminal, int card, int acct);
 int list_terminals(char *data, const int max_data);
 int list_transactions(int id, char *data, const int max_data);
 void show_terminal_info(char* tmp, int id);
-void get_ids(int* c_id, int* a_id, const char* url);
+void get_ids(int* c_id, int* a_id, const char* data);
 #endif //#ifndef _terminal_h
