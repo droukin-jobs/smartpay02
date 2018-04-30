@@ -56,8 +56,10 @@ send_page (struct MHD_Connection *connection, const char *page){
 	char *tmp=(char*)malloc(strlen(page) + 4);
 	sprintf(tmp,json_page,page);
 
+	free(page);
 	response = MHD_create_response_from_buffer (strlen (tmp), (void *) tmp,
 				MHD_RESPMEM_MUST_COPY);
+	free(tmp);
 	if (!response){
 		return MHD_NO;
 	}
