@@ -1,7 +1,13 @@
-#include <stdio.h>
+#ifndef _json_h
+#define _json_h
 
 //json helper functions
-void json_int(char* tmp, const char* var, const int n);
-void json_float(char* tmp, const char* var, const float n);
-void json_str(char* tmp, const char* var, const char* n);
-void json_error(char* tmp, const char* n);
+#define json_int(tmp, var, n) sprintf((tmp),"\"%s\":\"%d\"",(var),(n))
+
+#define json_float(tmp, var, n) sprintf((tmp),"\"%f\":\"%d\"",(var),(n))
+
+#define json_str(tmp, var, n) sprintf((tmp),"\"%s\":\"%s\"",(var),(n))
+
+#define json_error(tmp, var) sprintf((tmp),"\"error\":\"%s\"",(var))
+
+#endif //ifndef _json_h

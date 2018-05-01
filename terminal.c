@@ -2,10 +2,7 @@
 #include <stdlib.h>
 #include "terminal.h"
 #include "json.h"
-
-#ifdef PACK
 #include "packer.h"
-#endif
 
 //terminal array
 #define MAX_DATA 4096
@@ -17,10 +14,8 @@ int add_terminal(){
 	if((MAX_TERMINALS - 1) <= last_terminal) return -1;
 	last_terminal += 1;
 	int i = last_terminal;
-	printf("creating terminal index %d",i);
 	terminals[i].id = i;
 	terminals[i].last_transaction = -1;
-	printf(" done\n");
 	return i;
 }
 
@@ -29,163 +24,78 @@ int add_terminal(){
 // aborts (gracefully) execution if reached limit
 int list_terminals(char *data, const int max_data){
 	int i;
-	char tmp[24];
+	char tmp[24]; //placeholder for terminal id
 	if(last_terminal == -1){
 		return last_terminal;
 	}
 	int data_len = sprintf(data,"\"terminals\":[\n");
 	for(i=0;i<=last_terminal;i++){
-		printf("List terminal %d of %d, ",i,last_terminal);
 		int len = sprintf(tmp,"{\"TerminalID\":\"%04d\"},\n",terminals[i].id);
-		printf("Line %s, memory used: %d / %d, last 24 chars: %s\n", tmp, data_len,max_data,data + data_len - 24);
-		if(i == last_terminal) tmp[len - 2] = ' ';
 		memcpy(data + data_len , tmp, strlen(tmp));
-		data_len += len;
+		data_len += len; //update data pointer
 		if(data_len > max_data - len -2 ) break;
 	}
+	data[data_len - 2] = ' '; //remove last comma
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
 	return last_terminal;
 }
-#ifndef PACK
 // adds transaction to a terminal
-// not fully implemented 
-int add_transaction(int terminal, int card, int acct){
-	int id = terminal;
-	int i = id;
-	printf("add transaction (%d,%d) for term %d of %d\n",card,acct,i,last_terminal);	
-	if(terminal > last_terminal) return -1;
-	printf("MAX = %d, transaction = %d\n", MAX_TRANSACTIONS, terminals[i].last_transaction);	
-	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
+// return last transaction if successful, -1 if not
+int add_transaction(int id, int card, int acct){
+	if(id > last_terminal) return -1;
+	if((MAX_TRANSACTIONS - 1 ) <= terminals[id].last_transaction) return -1;
 	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
-	terminals[i].last_transaction += 1;
-	int j = terminals[i].last_transaction;	
-	terminals[i].transactions[j].id = j;
-	terminals[i].transactions[j].card = card;
-	terminals[i].transactions[j].acct = acct;
-	printf("added transaction %d\n",j);
+	terminals[id].last_transaction += 1;
+	int j = terminals[id].last_transaction;	
+	terminals[id].transactions[j >> 1] |= PACK_CARD(j,card);
+	terminals[id].transactions[j >> 1] |= PACK_ACCT(j,acct);
 	return j;
 }
 
+// copy transaction data in JSON format to data param
+
 int list_transactions(int id, char *data, const int max_data){
-	int i;
-	char tmp[100];
+	char tmp[100]; //temporary var to store transaction data
 	int lt = terminals[id].last_transaction;
-	printf("list transactions lt=%d\n",lt);
 	if(lt == -1){
 		return lt;
 	}
-	printf("list transaction for term %d\n",id);
 	int data_len = sprintf(data,"[\n");
-	for(i=0;i<=lt;i++){
-		printf("listing transaction %d of %d\n",i, lt);
-		int c_id = terminals[id].transactions[i].card;
-		int a_id = terminals[id].transactions[i].acct;
-		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		if(i == lt) tmp[len - 2] = ' ';
-		printf("about to update data \n |%s|\n %d chars at %d\n",tmp, len, data_len);
-		memcpy(data + data_len , tmp, len);
-		printf("updated data\n");
-		data_len += len;
-		if(data_len > max_data - len -2 ) break;
-	}
-	data[data_len] = ']';
-	data[data_len+1] = '\0';
-	printf("DATA %s\n",data);
-	return lt;
-}
-//
-// shows terminal json object with dummy (at the moment) transactions
-void show_terminal_info(char* tmp, int id){
-	
-	if(id > last_terminal){
-		printf("invalid id %d of %d\n",id, last_terminal);
-		json_error(tmp,"Invalid terminal");
-		return;
-	}
-	printf("show term info id %d\n",id);
-	char *data = (char*)malloc(MAX_DATA);
-	printf("list transactions with max data %d\n",MAX_DATA);
-	if(list_transactions(id,data,MAX_DATA) == -1){
-		printf("no transactions\n");
-		sprintf(data,"[]");	
-	}
-	printf("end list transactions\n");
-	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
-	printf("TMP %s\n",tmp);
-}
-
-#else
-// use PACK algorithm
-//
-// adds transaction to a terminal
-// not fully implemented 
-int add_transaction(int terminal, int card, int acct){
-	int id = terminal;
-	int i = id;
-	printf("PACK add transaction (%d,%d) for term %d of %d\n",card,acct,i,last_terminal);	
-	if(terminal > last_terminal) return -1;
-	printf("PACK MAX = %d, transaction = %d\n", MAX_TRANSACTIONS, terminals[i].last_transaction);	
-	if((MAX_TRANSACTIONS - 1 ) <= terminals[i].last_transaction) return -1;
-	if(card > 3 || acct > 3 || card < 0 || acct < 0) return -1;
-	terminals[i].last_transaction += 1;
-	int j = terminals[i].last_transaction;	
-	terminals[i].transactions[j >> 1] |= PACK_CARD(j,card);
-	terminals[i].transactions[j >> 1] |= PACK_ACCT(j,acct);
-	printf("PACK added transaction %d, card=%d, acct=%d, value=%u\n",j,card,acct,(unsigned int)(terminals[i].transactions[j >> 1]));
-	return j;
-}
-
-int list_transactions(int id, char *data, const int max_data){
 	int i;
-	char tmp[100];
-	int lt = terminals[id].last_transaction;
-	printf("PACK list transactions lt=%d\n",lt);
-	if(lt == -1){
-		return lt;
-	}
-	printf("PACK list transaction for term %d\n",id);
-	int data_len = sprintf(data,"[\n");
 	for(i=0;i<=lt;i++){
-		printf("PACK listing transaction %d of %d, value %u\n",i, lt,(unsigned int)(terminals[id].transactions[i]));
+		//extract transaction data 
 		int c_id = UNPACK_CARD(i,terminals[id].transactions[i>>1]);
 		int a_id = UNPACK_ACCT(i,terminals[id].transactions[i>>1]);
 		int len = sprintf(tmp,"{\"CardType\":\"%s\",\"TransactionType\":\"%s\"},\n",cards[c_id],accts[a_id]);
-		if(i == lt) tmp[len - 2] = ' ';
-		printf("PACK about to update data \n |%s|\n %d chars at %d\n",tmp, len, data_len);
 		memcpy(data + data_len , tmp, len);
-		printf("PACK updated data\n");
-		data_len += len;
+		data_len += len;//update data pointer
+		//check if possible to add more transactions to data param
 		if(data_len > max_data - len -2 ) break;
 	}
+	data[data_len - 2] = ' '; //last transaction does not need comma
 	data[data_len] = ']';
 	data[data_len+1] = '\0';
-	printf("PACK DATA %s\n",data);
 	return lt;
 }
 
 
-// shows terminal json object with dummy (at the moment) transactions
+// shows terminal json object with transactions
 void show_terminal_info(char* tmp, int id){
 	
 	if(id > last_terminal){
-		printf("invalid id %d of %d\n",id, last_terminal);
 		json_error(tmp,"Invalid terminal");
 		return;
 	}
-	printf("show term info id %d\n",id);
 	char *data = (char*)malloc(MAX_DATA);
-	printf("list transactions with max data %d\n",MAX_DATA);
 	if(list_transactions(id,data,MAX_DATA) == -1){
-		printf("no transactions\n");
 		sprintf(data,"[]");	
 	}
-	printf("end list transactions\n");
 	sprintf(tmp,"\"TerminalID\":\"%d\",\"Transactions\":%s",id, data);
-	printf("TMP %s\n",tmp);
 }
-#endif
 
+
+// init cards and accts arrays
 void init(void){
 	sprintf(cards[0],"MasterCard");
 	sprintf(cards[1],"Visa");
@@ -193,4 +103,30 @@ void init(void){
 	sprintf(accts[0],"Credit");
 	sprintf(accts[1],"Savings");
 	sprintf(accts[2],"Cheque");
+}
+
+
+// get card and acct ids from json string 
+
+void get_ids(int* c_id, int* a_id, const char* data){
+	int i;
+	//temporary vars to hold terminal data
+	char c[50];
+	char a[50];
+	*c_id = -1;
+	*a_id = -1;
+	for(i=0;i<3;i++){
+		if(strstr(data,cards[i]) != NULL){
+			*c_id = i;
+			sprintf(c,"%s",cards[i]);
+			break;
+		}
+	}
+	for(i=0;i<3;i++){
+		if(strstr(data,accts[i])!=NULL){
+			*a_id = i;
+			sprintf(a,"%s",accts[i]);
+			break;
+		}
+	}
 }
